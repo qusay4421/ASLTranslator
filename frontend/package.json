@@ -5,10 +5,12 @@
   "scripts": {
     "dev": "concurrently \"vite\" \"wait-on http://localhost:5173 && electron .\"",
     "build": "vite build",
+    "dist": "vite build && electron-builder",
     "electron": "electron .",
     "preview": "vite preview"
   },
   "dependencies": {
+    "peerjs": "^1.5.5",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "socket.io-client": "^4.8.1"
@@ -20,5 +22,39 @@
     "electron-builder": "^25.1.8",
     "vite": "^6.0.5",
     "wait-on": "^8.0.1"
+  },
+  "build": {
+    "appId": "com.asltranslator.app",
+    "productName": "ASL Translator",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "main.js",
+      "preload.js",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "../backend/dist/backend",
+        "to": "backend",
+        "filter": ["**/*"]
+      }
+    ],
+    "win": {
+      "target": "nsis",
+      "sign": "./sign.js"
+    },
+    "mac": {
+      "target": "dmg"
+    },
+    "linux": {
+      "target": "AppImage"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    }
   }
 }
