@@ -1,0 +1,9 @@
+tensorflow==2.15.0
+mediapipe==0.10.14
+opencv-python==4.10.0.84
+fastapi
+uvicorn
+python-socketio
+websockets
+numpy
+scikit-learn

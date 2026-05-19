@@ -27,6 +27,12 @@ Thumbs.db
 .env
 *.env
 
+# Node
+node_modules/
+
+# Logs
+logs/
+
 # Models / large files
 *.pt
 *.pth
