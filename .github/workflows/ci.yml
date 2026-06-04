@@ -1,0 +1,27 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  backend-pipeline-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Install test dependencies
+        # The pure-pipeline tests only need numpy + pytest, so we avoid the
+        # heavy tensorflow/mediapipe stack to keep CI fast.
+        run: pip install numpy pytest
+
+      - name: Run preprocessing unit tests
+        working-directory: backend
+        run: pytest
