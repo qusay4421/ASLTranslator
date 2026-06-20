@@ -38,3 +38,6 @@ logs/
 *.pth
 *.h5
 *.onnx
+
+# Generated datasets: collected sequences and downloaded WLASL videos
+/data/
