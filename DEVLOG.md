@@ -2,6 +2,40 @@
 
 Newest entry on top.
 
+## 2026-06-20 — Fix: detection "never worked"
+
+### Diagnosis
+Two causes, both consistent with detection silently doing nothing:
+1. The original code never drew landmarks (the old `landmarks.py` main showed the raw
+   webcam with no overlay), so working detection looked like nothing was happening.
+2. `requirements.txt` pinned MediaPipe 0.10.14 and TensorFlow 2.15 but left numpy
+   unpinned, so pip installed numpy 2.x. Both libraries require numpy < 2; the
+   mismatch makes detection install cleanly and then produce no landmarks (or crash).
+   protobuf 5.x causes the same class of breakage.
+
+### Did
+- Pinned the dependency stack in `requirements.txt`: `numpy==1.26.4` and
+  `protobuf>=3.20,<5`, with a comment explaining why. This is the most likely fix.
+- Added `backend/diagnose.py`: a layered self-test that checks Python version, numpy
+  and MediaPipe versions, that `mp.solutions.holistic` exists, that the camera opens
+  and returns a frame, and that a real frame produces landmarks. Each failure prints a
+  specific fix, so a silent failure becomes an actionable one.
+- `app.py` now shows a clear on-screen hint after about 5 seconds with no detection,
+  so a setup problem is visible instead of looking like the app does nothing. The
+  per-component status readout (added earlier) already shows which parts are detected.
+
+### Verified
+- All files compile; preprocessing tests still pass (6/6).
+- Could not run the camera/MediaPipe path here (build box is Python 3.14 with no GL
+  libs and a Tasks-only MediaPipe wheel). On your machine, run `python diagnose.py`
+  first: it will confirm the fix or point at the exact remaining problem.
+
+### If it still fails after this
+Run `python diagnose.py` and share the output. The most likely remaining causes it
+will surface are camera permissions (especially macOS) or a wrong Python version. If
+the versions are right and the camera works but landmarks still do not appear, the
+next step is porting detection to MediaPipe's current Tasks API.
+
 ## 2026-06-19 — Standalone real-time detection app, drawing, and data collection
 
 ### Did

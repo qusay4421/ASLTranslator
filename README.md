@@ -21,6 +21,13 @@ python app.py --translate     # also overlay sign predictions from the trained m
 
 Keys: `q` quits, `c` clears the translated sentence.
 
+If detection does nothing, run the diagnostic first. It checks versions, the camera,
+and a real detection, and prints the exact fix for whatever is wrong:
+
+```sh
+python diagnose.py
+```
+
 ## Add your own signs
 
 ```sh

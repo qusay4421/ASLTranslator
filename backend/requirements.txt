@@ -1,11 +1,16 @@
 # Requires Python 3.10 to 3.12. MediaPipe wheels for 3.13+ ship only the new Tasks
 # API and drop mp.solutions.holistic, which this project relies on.
+#
+# numpy and protobuf are pinned on purpose: numpy 2.x and protobuf 5.x silently break
+# MediaPipe 0.10 and TensorFlow 2.15 (detection installs but produces nothing). These
+# pins are the most common fix for "detection never worked".
 tensorflow==2.15.0
 mediapipe==0.10.14
 opencv-python==4.10.0.84
+numpy==1.26.4
+protobuf>=3.20,<5
 fastapi
 uvicorn
 python-socketio
 websockets
-numpy
 scikit-learn

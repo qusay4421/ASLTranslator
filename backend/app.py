@@ -29,7 +29,7 @@ WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 
 
-def draw_hud(image, status, fps, translation):
+def draw_hud(image, status, fps, translation, hint=None):
     """Overlay detection status, FPS, and any translation onto the frame."""
     h, w = image.shape[:2]
 
@@ -44,6 +44,12 @@ def draw_hud(image, status, fps, translation):
 
     cv2.putText(image, f"{fps:4.1f} FPS", (w - 110, 25),
                 cv2.FONT_HERSHEY_SIMPLEX, 0.5, WHITE, 1, cv2.LINE_AA)
+
+    # Surfaced when nothing has been detected for a while, so a silent failure
+    # (bad install, camera too dark, hands out of frame) is visible rather than
+    # looking like the app simply does nothing.
+    if hint:
+        cv2.putText(image, hint, (10, 55), cv2.FONT_HERSHEY_SIMPLEX, 0.55, (0, 200, 255), 2, cv2.LINE_AA)
 
     if translation is not None:
         # A filled strip keeps the caption readable over a busy background.
@@ -77,6 +83,7 @@ def main():
 
     prev = time.time()
     fps = 0.0
+    frames_without_detection = 0
     with mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confidence=0.5) as holistic:
         while True:
             ok, frame = cap.read()
@@ -87,6 +94,16 @@ def main():
 
             vec, results = process_frame(frame, holistic)
             draw_landmarks(frame, results)
+
+            status = detection_status(results)
+            if any(status.values()):
+                frames_without_detection = 0
+            else:
+                frames_without_detection += 1
+            # About 5 seconds at typical frame rates with nothing detected points to a
+            # setup problem rather than a momentary gap.
+            hint = "No landmarks detected. Check lighting, camera, and your install." \
+                if frames_without_detection > 150 else None
 
             translation = None
             if predictor is not None:
@@ -104,7 +121,7 @@ def main():
             if dt > 0:
                 fps = 0.9 * fps + 0.1 * (1.0 / dt)
 
-            draw_hud(frame, detection_status(results), fps, translation)
+            draw_hud(frame, status, fps, translation, hint)
             cv2.imshow("ASL Translator", frame)
 
             key = cv2.waitKey(1) & 0xFF
